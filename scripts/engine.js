@@ -17,7 +17,8 @@
   const ROOT = SAATH.root || "";
   const slug = (params.get("c") || "demo").replace(/[^a-z0-9-]/gi, "");
   // Photos and voice notes come from the website as absolute URLs; older records name files beside the couple.
-  const media = (src) => (/^(data:|blob:|https?:|\/)/.test(src) ? src : `${ROOT}couples/${slug}/${src}`);
+  // Self-hosted copy: "./images/..." paths are used as they are, beside index.html.
+  const media = (src) => (/^(data:|blob:|https?:|\/|\.{1,2}\/)/.test(src) ? src : `${ROOT}couples/${slug}/${src}`);
   // The family: from the page (a family's own link, i/<slug>/<key>, resolved by the site), or ?f=.
   const familyParam = (SAATH.family || params.get("f") || "").trim().slice(0, 40);
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1321,7 +1322,7 @@
         ${has(data.signoff) ? `<p class="so-text" lang="${lang}">${esc(nb(pick(data.signoff)))}</p>` : ""}
         ${logoMark("so-logo")}
         <p class="so-names" lang="${lang}">${names}</p>
-        <a class="made" href="https://saath.studio" target="_blank" rel="noopener"><span lang="${lang}">${esc(u.made)}</span><img src="${ROOT}mark.svg" alt="" width="16" height="16">saath.studio</a>
+        <a class="made" href="https://saath.studio" target="_blank" rel="noopener"><span lang="${lang}">${esc(u.made)}</span><img src="${ROOT}images/mark.svg" alt="" width="16" height="16">saath.studio</a>
       </footer>`;
     document.documentElement.style.setProperty("--arch", `url("${archMask()}")`);
     drawArch();
