@@ -42,7 +42,8 @@
 </main>
 
 <div class="controls" id="controls" hidden>
-  <button class="lang" id="langBtn" type="button" aria-label="Switch language"></button>
+  <!-- Hindi/English switch: hidden, the invite is English only. Kept in the page because engine.js looks it up. -->
+  <button class="lang" id="langBtn" type="button" aria-label="Switch language" hidden style="display:none"></button>
   <button class="sound" id="soundBtn" type="button" aria-pressed="false" aria-label="Play music">
     <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
     <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z" fill="currentColor"/></svg>
