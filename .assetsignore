@@ -8,4 +8,4 @@ node_modules
 .assetsignore
 .gitignore
 wrangler.jsonc
-music/README.md
+worker.js

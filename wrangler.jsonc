@@ -2,10 +2,14 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "wedding-invitation2",
   "compatibility_date": "2026-11-04",
+  // Only answers the song's byte-range requests (see worker.js); the site itself is static files.
+  "main": "worker.js",
   "observability": {
     "enabled": true
   },
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": ["/music/*"]
   }
 }
