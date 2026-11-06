@@ -390,14 +390,21 @@
     if (SAATH.draft || params.has("draft")) { try { draft = JSON.parse(localStorage.getItem("saath-draft") || "null"); } catch {} }
     data = tidy(draft || SAATH.data || (await (await fetch(`${ROOT}couples/${slug}/invite.json`)).json()));
     let themeId = (params.get("t") || data.theme || "jharokha").replace(/[^a-z0-9-]/gi, "");
-    let res = await fetch(`${ROOT}themes/${themeId}/theme.json`);
-    // A collection that isn't built yet falls back to the first one that is.
-    if (!res.ok) {
-      try { themeId = (await (await fetch(`${ROOT}themes/index.json`)).json())[0].id; } catch { themeId = "jharokha"; }
-      res = await fetch(`${ROOT}themes/${themeId}/theme.json`);
+    // Self-hosted copy: the theme is written into the page (SAATH.theme, its art in SAATH.themeBase),
+    // so nothing is fetched and the page also works opened straight from disk (file://).
+    if (SAATH.theme?.id === themeId) {
+      theme = SAATH.theme;
+      base = ROOT + (SAATH.themeBase || `themes/${themeId}/`);
+    } else {
+      let res = await fetch(`${ROOT}themes/${themeId}/theme.json`);
+      // A collection that isn't built yet falls back to the first one that is.
+      if (!res.ok) {
+        try { themeId = (await (await fetch(`${ROOT}themes/index.json`)).json())[0].id; } catch { themeId = "jharokha"; }
+        res = await fetch(`${ROOT}themes/${themeId}/theme.json`);
+      }
+      base = `${ROOT}themes/${themeId}/`;
+      theme = await res.json();
     }
-    base = `${ROOT}themes/${themeId}/`;
-    theme = await res.json();
     if (theme.layout) LAY = await loadLayout(theme.layout);
     lang = ["hi", "en"].includes(params.get("lang")) ? params.get("lang") : data.lang || "en";
     document.documentElement.lang = lang;
