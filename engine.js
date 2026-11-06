@@ -1037,6 +1037,9 @@
     // The line names the day scratched: with no function that day, the wedding time the couple gave.
     const m = mainEvent();
     const w = full() ? (m && istDay(m.start) === istDay(day) ? m : { start: day, place: data.venue?.name }) : { ...(m || {}), start: day, place: data.city };
+    // Under the scratched date: the main venue and city, as on the invitation card ("Luv Kush Vatika,
+    // Kanpur"), not the wedding function's own place, which the celebrations list still gives.
+    const where = full() && has(data.venue?.name) ? `${pick(data.venue.name)}${has(data.city) ? `, ${pick(data.city)}` : ""}` : has(w.place) ? pick(w.place) : "";
     // The day, the month and the year each under its own foil, or the whole date under one, as the
     // couple chooses in the editor (scratch: "one", Gautam, 4 November 2026).
     const one = data.scratch === "one";
@@ -1060,7 +1063,7 @@
       </div>
       <div class="when-wrap${parts.every((_, i) => revealed.has(i)) ? "" : " hide"}" id="whenLine"><p class="when-line" lang="${lang}">
         ${esc(full() ? u.whenLine(fmt(w.start, { weekday: "long" }), clock(w === m ? weddingAt(m) : w.start)) : fmt(w.start, { weekday: "long" }))}<br>
-        ${has(w.place) ? `<span class="soft">${esc(pick(w.place))}</span><br>` : ""}
+        ${where ? `<span class="soft">${esc(where)}</span><br>` : ""}
         ${data.events?.includes(w) ? `<button class="textbtn" type="button" data-cal="${data.events.indexOf(w)}" lang="${lang}">${esc(u.addCal)}</button>` : ""}
       </p></div>`);
   }
