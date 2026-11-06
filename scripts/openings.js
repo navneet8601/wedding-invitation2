@@ -10,7 +10,7 @@
  */
 (() => {
   // With CORS, so the relief and the seal can read pixels when the art comes from the asset host.
-  const load = (src) => new Promise((ok, bad) => { const i = new Image(); i.decoding = "async"; i.onload = () => ok(i); i.onerror = bad; i.src = src; });
+  const load = (src) => new Promise((ok, bad) => { const i = new Image(); i.decoding = "async"; i.crossOrigin = "anonymous"; i.onload = () => ok(i); i.onerror = bad; i.src = src; });
   const el = (tag, cls, parent) => { const e = document.createElement(tag); if (cls) e.className = cls; parent?.appendChild(e); return e; };
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
@@ -64,7 +64,7 @@
       const hinge = o.flap?.hinge_y ?? env.top;
       for (const [k, v] of [["--fx0", env.left], ["--fx1", env.right], ["--fy0", hinge], ["--tx", tip[0]], ["--ty", tip[1]]]) box.style.setProperty(k, `${v * 100}%`);
       const over = el("img", "op-over", box);
-      over.src = closed; over.alt = "";
+      over.crossOrigin = "anonymous"; over.src = closed; over.alt = "";
       // The flap's outline when the theme traced it (a V with straight shoulders), else the V to the tip.
       const poly = Array.isArray(o.flap?.polygon) ? o.flap.polygon : [[env.left, hinge], [env.right, hinge], tip];
       const clip = (pts) => `polygon(${pts.map(([x, y]) => `${(x * 100).toFixed(2)}% ${(y * 100).toFixed(2)}%`).join(", ")})`;
@@ -513,7 +513,7 @@
     under.src = base + theme.art.open; under.alt = "";
     // With CORS, as the hero's painting, so the engine can read the closed doors under the words.
     const over = el("img", "op-over", box);
-    over.src = base + theme.art.closed; over.alt = "";
+    over.crossOrigin = "anonymous"; over.src = base + theme.art.closed; over.alt = "";
     const closed = base + theme.art.closed;
     const mid = o.seam || (x0 + x1) / 2;
     const leaves = [["left", x0, mid], ["right", mid, x1]].map(([side, a, b]) => {
@@ -571,7 +571,7 @@
     const under = el("img", "op-under", box);
     under.src = base + theme.art.open; under.alt = "";
     const over = el("img", "op-over", box);
-    over.src = base + theme.art.closed; over.alt = "";
+    over.crossOrigin = "anonymous"; over.src = base + theme.art.closed; over.alt = "";
     // The strips are cut from the closed painting, or from `panels` when something that must stay
     // still (Genda's toran) hangs in front of the curtain and is painted out of that copy.
     const closed = base + (theme.art.panels || theme.art.closed);
@@ -658,7 +658,7 @@
     const under = el("img", "op-under", box);
     under.src = base + theme.art.open; under.alt = "";
     const over = el("img", "op-over", box);
-    over.src = base + theme.art.closed; over.alt = "";
+    over.crossOrigin = "anonymous"; over.src = base + theme.art.closed; over.alt = "";
     const sparks = el("canvas", "op-sparks", box);
     const btn = el("button", "op-point", box);
     btn.type = "button";
@@ -754,7 +754,7 @@
     const end = el("img", "op-end", box);
     end.src = base + (o.last || theme.art.open || o.first); end.alt = "";
     const still = el("img", "op-still", box);
-    still.src = base + (o.first || theme.art.closed); still.alt = "";
+    still.crossOrigin = "anonymous"; still.src = base + (o.first || theme.art.closed); still.alt = "";
     const btn = el("button", "op-tap", box);
     btn.type = "button";
     btn.setAttribute("aria-label", label);

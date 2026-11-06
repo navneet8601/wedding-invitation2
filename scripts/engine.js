@@ -17,8 +17,7 @@
   const ROOT = SAATH.root || "";
   const slug = (params.get("c") || "demo").replace(/[^a-z0-9-]/gi, "");
   // Photos and voice notes come from the website as absolute URLs; older records name files beside the couple.
-  // Self-hosted copy: "./images/..." paths are used as they are, beside index.html.
-  const media = (src) => (/^(data:|blob:|https?:|\/|\.{1,2}\/)/.test(src) ? src : `${ROOT}couples/${slug}/${src}`);
+  const media = (src) => (/^(data:|blob:|https?:|\/)/.test(src) ? src : `${ROOT}couples/${slug}/${src}`);
   // The family: from the page (a family's own link, i/<slug>/<key>, resolved by the site), or ?f=.
   const familyParam = (SAATH.family || params.get("f") || "").trim().slice(0, 40);
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -171,9 +170,15 @@
   // usual functions start with their Hindi, the editor hides it while Hindi is off, and couples who
   // renamed the Wedding to their Gaaye Holud in English got विवाह under it (3 November 2026). Kept
   // the same in cards.js and walk/walk.js.
-  const FN_WORDS = [...SLOTS, ...OWN, ["wedding", WEDDING], ["haldi", /halad|हळद/], ["reception", /स्वागत|वलीमा/], ["wedding", /muhurt|मुहूर्त|आनंद कारज/], ["engagement", /निश्चय/]];
+  const FN_WORDS = [...SLOTS, ...OWN, ["wedding", WEDDING], ["haldi", /halad|हळद/], ["reception", /स्वागत|वलीमा/], ["wedding", /phere|muhurt|मुहूर्त|आनंद कारज/], ["engagement", /निश्चय|sagaa+i|sagaee/]];
   const fnOf = (s) => findIn(FN_WORDS, (s || "").toLowerCase())?.[0] || "";
-  const ownHi = (e) => { const hi = fnOf(e?.name?.hi); return !hi || hi === fnOf(e.name.en); };
+  // A Hindi name for several functions is kept when the English names any of them: Surabhi's "Baraat
+  // Swagat, Varmala and Pheras" lost its "बरात स्वागत, वरमाला और फेरे", since the English named the
+  // baraat first and the Hindi the pheras (5 November 2026). One for a single function still has to
+  // name the English one's first, so "Wedding Reception" keeps hiding a विवाह left from "Wedding".
+  // "Phere" is the wedding here only: as a slot it would move four invites' wedding time.
+  const fnsOf = (s) => { const t = (s || "").toLowerCase(); return new Set(FN_WORDS.filter(([, a, b]) => a.test(t) || b?.test(t)).map(([k]) => k)); };
+  const ownHi = (e) => { const hi = fnsOf(e?.name?.hi); if (hi.size < 2) return !hi.size || hi.has(fnOf(e.name.en)); const en = fnsOf(e.name.en); return [...hi].some((k) => en.has(k)); };
   // [slot, how sure]: 0 named for it, 1 held in its place, 2 only its id says so, 3 nothing does
   // (the wedding's slot). A name always beats an id: a couple who renamed the template's Sangeet to
   // their pool party mean the pool party (31 October 2026).
@@ -310,7 +315,9 @@
   const art = (k) => (theme.art?.[k] ? base + theme.art[k] : null);
   // In date order, whatever order the couple added them in: a haldi added last for the 16th came after
   // the wedding on the 20th (31 October 2026). The walk-throughs and the newspaper sort the same way.
-  const events = () => (data.events || []).filter((e) => e.name && e.start && (!e.for || e.for.includes(group))).sort((a, b) => new Date(a.start) - new Date(b.start));
+  // A function for one family's guests ("side:bride") shows in that family's version, the editor's
+  // preview included. A guest's page has no `for`: the server sent only their functions (forGuest).
+  const events = () => (data.events || []).filter((e) => e.name && e.start && (!e.for || e.for.includes(group) || e.for.includes(`side:${data.groomFirst ? "groom" : "bride"}`))).sort((a, b) => new Date(a.start) - new Date(b.start));
   const firstEvent = () => [...events()].sort((a, b) => new Date(a.start) - new Date(b.start))[0];
   const lastEvent = () => [...(data.events || [])].sort((a, b) => new Date(b.end || b.start) - new Date(a.end || a.start))[0];
   const afterWedding = () => { const l = lastEvent(); return !!l && Date.now() > new Date(l.end || l.start).getTime() + 6 * 36e5; };
@@ -334,6 +341,12 @@
   };
   // The day in India a moment falls on, "" for none.
   const istDay = (iso) => { const t = new Date(iso).getTime(); return Number.isFinite(t) ? new Date(t + 19800000).toISOString().slice(0, 10) : ""; };
+  // The time beside the wedding date: the one the couple gave under the date, once they've changed it
+  // from the start's 7 pm, else that of the function that day (mainEvent). Surabhi gave 10:30 for her
+  // pheras and saw the 8:30 of the Baraat Swagat they're part of; nine couples who left the 7 pm had
+  // moved only their wedding function's time (5 November 2026). cards.js and walk.js do the same.
+  const gaveTime = () => { const t = new Date(data.wedding).getTime(); return Number.isFinite(t) && new Date(t + 19800000).toISOString().slice(11, 16) !== "19:00"; };
+  const weddingAt = (m) => (m && istDay(m.start) === istDay(data.wedding) && gaveTime() ? data.wedding : m?.start);
   // The day the invite is for, as the couple gave it: the wedding's, or the engagement's or the
   // function's (the editor names the date for the occasion).
   const mainDate = () => data.wedding;
@@ -354,6 +367,21 @@
   // The town under a function at the main venue, when others are elsewhere (a Bangalore puja and an
   // Udaipur sangeet), so guests can tell where each is (a bride asked, 4 November 2026).
   const townLine = (e) => (!ownVenue(e) && has(data.city) && (data.events || []).some(ownVenue) ? pick(data.city) : "");
+  const STATES = /^(andhra pradesh|arunachal pradesh|assam|bihar|chhattisgarh|goa|gujarat|haryana|himachal pradesh|jharkhand|karnataka|kerala|madhya pradesh|maharashtra|manipur|meghalaya|mizoram|nagaland|odisha|orissa|punjab|rajasthan|sikkim|tamil ?nadu|telangana|tripura|uttar pradesh|uttarakhand|west bengal|jammu (and|&) kashmir|ladakh|india|राजस्थान|कर्नाटक|महाराष्ट्र|उत्तर प्रदेश|मध्य प्रदेश|गुजरात|हरियाणा|पंजाब|बिहार|पश्चिम बंगाल|तमिलनाडु|तेलंगाना|केरल|भारत)$/i;
+  // A function at a venue of its own: its town, the last part of its address less the PIN and the
+  // state ("…, Bengaluru - 560 114", "…, Gurugram, Haryana 122001"), shown under its place where the
+  // address itself is left to the venue section. Nothing for an address without parts or a PIN
+  // ("Near the old temple"), or when the last part isn't a short name. walk.js has the same.
+  const awayTown = (e) => {
+    const a = String(pick(e.address) || "");
+    if (!/,|\d{3}\s?\d{3}/.test(a)) return "";
+    const parts = a.split(",").map((s) => s.replace(/[\s\-–]*\d[\d\s]*$/, "").trim()).filter(Boolean);
+    while (parts.length > 1 && STATES.test(parts[parts.length - 1])) parts.pop();
+    const t = (parts[parts.length - 1] || "").replace(/^[\s(]+|[\s.)\]]+$/g, "");
+    // A road isn't a town ("…, Chandapura-Anekal Rd").
+    if (/\b(rd|road|marg|street|st|lane|highway|nh)\.?$/i.test(t)) return "";
+    return t.length <= 24 && !/\d/.test(t) && t.toLowerCase() !== String(pick(e.place) || "").trim().toLowerCase() ? t : "";
+  };
   // "Haldi & Wedding", "Haldi, Mehendi & Wedding", "हल्दी एवं विवाह".
   const andList = (l) => { const n = l.filter(Boolean); return n.length > 1 ? `${n.slice(0, -1).join(", ")} ${lang === "hi" ? "एवं" : "&"} ${n.at(-1)}` : n[0] || ""; };
   // The record without the lines the couple left blank: a box typed in and cleared, an "Add a moment"
@@ -390,21 +418,14 @@
     if (SAATH.draft || params.has("draft")) { try { draft = JSON.parse(localStorage.getItem("saath-draft") || "null"); } catch {} }
     data = tidy(draft || SAATH.data || (await (await fetch(`${ROOT}couples/${slug}/invite.json`)).json()));
     let themeId = (params.get("t") || data.theme || "jharokha").replace(/[^a-z0-9-]/gi, "");
-    // Self-hosted copy: the theme is written into the page (SAATH.theme, its art in SAATH.themeBase),
-    // so nothing is fetched and the page also works opened straight from disk (file://).
-    if (SAATH.theme?.id === themeId) {
-      theme = SAATH.theme;
-      base = ROOT + (SAATH.themeBase || `themes/${themeId}/`);
-    } else {
-      let res = await fetch(`${ROOT}themes/${themeId}/theme.json`);
-      // A collection that isn't built yet falls back to the first one that is.
-      if (!res.ok) {
-        try { themeId = (await (await fetch(`${ROOT}themes/index.json`)).json())[0].id; } catch { themeId = "jharokha"; }
-        res = await fetch(`${ROOT}themes/${themeId}/theme.json`);
-      }
-      base = `${ROOT}themes/${themeId}/`;
-      theme = await res.json();
+    let res = await fetch(`${ROOT}themes/${themeId}/theme.json`);
+    // A collection that isn't built yet falls back to the first one that is.
+    if (!res.ok) {
+      try { themeId = (await (await fetch(`${ROOT}themes/index.json`)).json())[0].id; } catch { themeId = "jharokha"; }
+      res = await fetch(`${ROOT}themes/${themeId}/theme.json`);
     }
+    base = `${ROOT}themes/${themeId}/`;
+    theme = await res.json();
     if (theme.layout) LAY = await loadLayout(theme.layout);
     lang = ["hi", "en"].includes(params.get("lang")) ? params.get("lang") : data.lang || "en";
     document.documentElement.lang = lang;
@@ -1038,7 +1059,7 @@
           </div>`).join("")}
       </div>
       <div class="when-wrap${parts.every((_, i) => revealed.has(i)) ? "" : " hide"}" id="whenLine"><p class="when-line" lang="${lang}">
-        ${esc(full() ? u.whenLine(fmt(w.start, { weekday: "long" }), clock(w.start)) : fmt(w.start, { weekday: "long" }))}<br>
+        ${esc(full() ? u.whenLine(fmt(w.start, { weekday: "long" }), clock(w === m ? weddingAt(m) : w.start)) : fmt(w.start, { weekday: "long" }))}<br>
         ${has(w.place) ? `<span class="soft">${esc(pick(w.place))}</span><br>` : ""}
         ${data.events?.includes(w) ? `<button class="textbtn" type="button" data-cal="${data.events.indexOf(w)}" lang="${lang}">${esc(u.addCal)}</button>` : ""}
       </p></div>`);
@@ -1056,8 +1077,9 @@
     // formal card"), and in Hindi falls back to the English, as everything else does.
     const nm = (p) => (lang === "hi" ? p.full?.hi || p.hi || p.full?.en || p.en : p.full?.en || p.en);
     const pack = PACKS[data.community] || PACKS.none;
-    // The couple's chosen line, else the design's own (Ayodhya's जय सियाराम), else their tradition's.
-    const invocation = data.invocation === false ? null : data.invocation || theme.invocation || pack.invocation;
+    // The couple's chosen line (in Hindi on the Hindi page, when we stored it so), else the design's
+    // own (Ayodhya's जय सियाराम), else their tradition's.
+    const invocation = data.invocation === false ? null : (lang === "hi" && data.invocationHi) || data.invocation || theme.invocation || pack.invocation;
     const parents = has(data.parents?.her) || has(data.parents?.him);
     // A design's blessing painting (Ayodhya's Ram Darbar, 2 November 2026) opens the invitation, as
     // the deity heads a printed card: still, whole, above every word, until the couple turns it off.
@@ -1124,6 +1146,9 @@
           const file = arts.get(e);
           const img = file ? base + file : null;
           const i = data.events.indexOf(e);
+          // A function at a venue of its own gives its place, its town and Directions here, and its full
+          // address in the venue section below: given twice, it crowded the list (Surabhi, 5 November
+          // 2026). Only a place left unnamed keeps its address here. walk.js's sheet does the same.
           return `<article class="tl"${mood ? ` style="--mood:${esc(mood)}"` : ""}>
             ${img ? `<img class="art reveal" src="${img}" alt="" loading="lazy" decoding="async">` : `<span class="art glyph reveal" aria-hidden="true">${ORN}</span>`}
             <div class="txt reveal">
@@ -1131,7 +1156,8 @@
               <span class="time" lang="${lang}">${esc(clock(e.start))}</span>
               <span class="nm" lang="${lang}">${esc(pick(e.name))}${lang === "en" && e.name.hi ? `<small lang="hi">${esc(e.name.hi)}</small>` : ""}</span>
               ${has(e.place) ? `<span class="place" lang="${lang}">${esc(pick(e.place))}</span>` : ""}
-              ${has(e.address) ? `<span class="addr" lang="${lang}">${esc(pick(e.address))}</span>` : ""}
+              ${has(e.address) && !has(e.place) ? `<span class="addr" lang="${lang}">${esc(pick(e.address))}</span>` : ""}
+              ${has(e.address) && has(e.place) && awayTown(e) ? `<span class="addr" lang="${lang}">${esc(awayTown(e))}</span>` : ""}
               ${townLine(e) ? `<span class="addr" lang="${lang}">${esc(townLine(e))}</span>` : ""}
               <button class="textbtn" type="button" data-cal="${i}" lang="${lang}">${esc(u.addCal)}</button>
               ${mapOf(e) ? `<a class="textbtn" href="${esc(mapOf(e))}" target="_blank" rel="noopener" lang="${lang}">${esc(u.directions)}</a>` : ""}
@@ -1329,6 +1355,7 @@
         ${has(data.signoff) ? `<p class="so-text" lang="${lang}">${esc(nb(pick(data.signoff)))}</p>` : ""}
         ${logoMark("so-logo")}
         <p class="so-names" lang="${lang}">${names}</p>
+        <a class="made" href="https://saath.studio" target="_blank" rel="noopener"><span lang="${lang}">${esc(u.made)}</span><img src="${ROOT}mark.svg" alt="" width="16" height="16">saath.studio</a>
       </footer>`;
     document.documentElement.style.setProperty("--arch", `url("${archMask()}")`);
     drawArch();

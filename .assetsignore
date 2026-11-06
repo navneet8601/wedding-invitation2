@@ -1,0 +1,11 @@
+# Files in this folder that are not part of the website
+.git
+.claude
+.wrangler
+node_modules
+.DS_Store
+**/.DS_Store
+.assetsignore
+.gitignore
+wrangler.jsonc
+music/README.md
