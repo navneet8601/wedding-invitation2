@@ -418,6 +418,7 @@ body.dark .hw-name { filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.6)); }
 .tl .nm { font: 600 21px/1.2 var(--serif); color: var(--ink); }
 .tl .nm small { display: block; font: 400 15px/1.4 var(--deva); color: var(--gold-deep); }
 .tl .nm:lang(hi) { font: 400 20px/1.4 var(--deva); }
+.tl .ev-note { font: italic 500 16px/1.35 var(--serif); color: var(--gold-text, var(--gold-deep)); }
 .tl .place { font: italic 400 15.5px/1.35 var(--serif); color: var(--ink-soft); }
 .tl .place:lang(hi) { font: 400 14px/1.5 var(--deva); }
 .tl .textbtn { font-size: 14.5px; padding: 4px 0; }

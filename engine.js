@@ -1160,6 +1160,7 @@
               <span class="caps" lang="${lang}">${esc(fmt(e.start, { weekday: "short", day: "numeric", month: "short" }))}</span>
               <span class="time" lang="${lang}">${esc(clock(e.start))}</span>
               <span class="nm" lang="${lang}">${esc(pick(e.name))}${lang === "en" && e.name.hi ? `<small lang="hi">${esc(e.name.hi)}</small>` : ""}</span>
+              ${has(e.note) ? `<span class="ev-note" lang="${lang}">${esc(pick(e.note))}</span>` : ""}
               ${has(e.place) ? `<span class="place" lang="${lang}">${esc(pick(e.place))}</span>` : ""}
               ${has(e.address) && !has(e.place) ? `<span class="addr" lang="${lang}">${esc(pick(e.address))}</span>` : ""}
               ${has(e.address) && has(e.place) && awayTown(e) ? `<span class="addr" lang="${lang}">${esc(awayTown(e))}</span>` : ""}
