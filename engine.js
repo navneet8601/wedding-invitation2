@@ -203,7 +203,8 @@
   const NEAR = { haldi: "mehendi", mehendi: "haldi", sangeet: "reception", reception: "sangeet", roka: "engagement", engagement: "roka", dinner: "reception" };
   const fnArt = (evs) => {
     const fn = { ...theme.art?.fn, ...(theme.art?.motif ? { motif: theme.art.motif } : {}) };
-    const asks = evs.filter((e) => nameOf(e).trim() && e.start).map((e) => {
+    // A function with art: false shows the ornament, not a painting, and takes none from the others.
+    const asks = evs.filter((e) => nameOf(e).trim() && e.start && e.art !== false).map((e) => {
       const [slot, sure] = slotOf(e);
       const own = findIn(OWN, nameOf(e)) || findIn(OWN, (e.id || "").toLowerCase());
       return own && fn[own[0]] ? { e, slot, key: own[0], sure: own[1] } : { e, slot, key: slot, sure };
