@@ -1358,6 +1358,7 @@
         ${has(data.signoff) ? `<p class="so-text" lang="${lang}">${esc(nb(pick(data.signoff)))}</p>` : ""}
         ${logoMark("so-logo")}
         <p class="so-names" lang="${lang}">${names}</p>
+        ${has(data.hashtag) ? `<p class="so-tag" lang="${lang}">${esc(pick(data.hashtag))}</p>` : ""}
       </footer>`;
     document.documentElement.style.setProperty("--arch", `url("${archMask()}")`);
     drawArch();

@@ -582,6 +582,7 @@ audio { width: 100%; max-width: 360px; margin-top: 8px; }
 .so-names { margin: 10px 0 0; font: 400 40px/1.2 var(--script); color: var(--gold-text, var(--gold-deep)); }
 .so-amp { font: italic 400 30px/1 var(--serif); margin: 0 0.06em; }
 .so-names:lang(hi) .so-amp { font: 400 20px/1 var(--deva); }
+.so-tag { margin: 6px 0 0; font: italic 500 22px/1.3 var(--serif); letter-spacing: 0.02em; color: var(--gold-text, var(--gold-deep)); }
 /* "Invite made with" the Saath mark, at the size of the words, and saath.studio. */
 .made { display: inline-flex; align-items: center; gap: 5px; margin-top: 34px; font: 400 14px/1.4 var(--serif); color: var(--ink-soft); text-decoration: none; letter-spacing: 0.04em; }
 .made img { width: 1.15em; height: 1.15em; margin-left: 2px; }
