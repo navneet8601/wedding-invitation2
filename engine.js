@@ -1144,9 +1144,12 @@
     // A close-family function carries no "Family only" tag: only the families marked close see it
     // anyway, and couples didn't want the tag on their guests' invites (Kriti & Partha, 3 November 2026).
     const arts = fnArt(data.events || []);
-    return sec("celebrations", u.eventsT, `
-      <div class="timeline">
-        ${events().map((e) => {
+    // The day's last functions with no painting of their own (art: false) are written across the page
+    // under the timeline, centred, instead of in half of it beside an empty ornament.
+    const evs = events();
+    let cut = evs.length;
+    while (cut > 0 && evs[cut - 1].art === false) cut--;
+    const card = (e, solo) => {
           const slot = SLOT_FOR(e);
           const mood = theme.moods?.[slot]?.accent ? ink(theme.moods[slot].accent) : null;
           const file = arts.get(e);
@@ -1155,7 +1158,7 @@
           // A function at a venue of its own gives its place, its town and Directions here, and its full
           // address in the venue section below: given twice, it crowded the list (Surabhi, 5 November
           // 2026). Only a place left unnamed keeps its address here. walk.js's sheet does the same.
-          return `<article class="tl"${mood ? ` style="--mood:${esc(mood)}"` : ""}>
+          return `<article class="tl${solo ? " solo" : ""}"${mood ? ` style="--mood:${esc(mood)}"` : ""}>
             ${img ? `<img class="art reveal" src="${img}" alt="" loading="lazy" decoding="async">` : `<span class="art glyph reveal" aria-hidden="true">${ORN}</span>`}
             <div class="txt reveal">
               <span class="caps" lang="${lang}">${esc(fmt(e.start, { weekday: "short", day: "numeric", month: "short" }))}</span>
@@ -1170,8 +1173,12 @@
               ${mapOf(e) ? `<a class="textbtn" href="${esc(mapOf(e))}" target="_blank" rel="noopener" lang="${lang}">${esc(u.directions)}</a>` : ""}
             </div>
           </article>`;
-        }).join("")}
-      </div>`);
+    };
+    return sec("celebrations", u.eventsT, `
+      <div class="timeline">
+        ${evs.slice(0, cut).map((e) => card(e, false)).join("")}
+      </div>
+      ${evs.slice(cut).map((e) => card(e, true)).join("")}`);
   }
 
   function secCountdown() {

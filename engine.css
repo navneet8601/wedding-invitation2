@@ -425,6 +425,13 @@ body.dark .hw-name { filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.6)); }
 .tl .textbtn + .textbtn { margin-top: 0; }
 .tl .addr { font: 400 13.5px/1.35 var(--serif); color: var(--ink-soft); }
 .tl .addr:lang(hi) { font: 400 13px/1.5 var(--deva); }
+/* A closing function with no painting (art: false): centred across the page under the timeline, its ornament above it. */
+.tl.solo { grid-template-columns: 1fr; justify-items: center; row-gap: 8px; max-width: 400px; margin: 0 auto; padding-top: 4px; }
+.tl.solo::after { content: none; }
+.tl.solo .art { order: 0; }
+.tl.solo .art.glyph { width: 150px; aspect-ratio: auto; }
+.tl.solo .art.glyph .orn { width: 100%; }
+.tl.solo .txt { order: 1; text-align: center; justify-items: center; }
 
 /* Countdown */
 .count { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr); align-items: start; margin: 4px auto 0; max-width: 360px; }
