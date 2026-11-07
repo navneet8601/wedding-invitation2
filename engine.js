@@ -42,7 +42,7 @@
       whenLine: (wd, time) => `${wd}, at ${time}`, addCal: "Add to calendar",
       blessing: "With the blessings of our elders, you are invited to the wedding of",
       ownVoice: "Together with our families, we invite you to our wedding",
-      daughter: "Daughter of", son: "Son of", with: "with", close: "",
+      daughter: "Daughter of", son: "Son of", granddaughter: "Grand Daughter of", grandson: "Grand Son of", with: "with", close: "",
       dearAll: "Dear friends and family",
       storyT: "Our story", photosT: "Us, so far", swipe: "Swipe to see more",
       eventsT: "The celebrations",
@@ -88,7 +88,7 @@
       scratchLabel: (u) => `${u} देखने के लिए खुरचें`, revealed: (u, v) => `${u}: ${v}`,
       whenLine: (wd, time) => `${wd}, ${time} बजे`, addCal: "कैलेंडर में जोड़ें",
       blessing: "पूज्य बुज़ुर्गों के आशीर्वाद से", ownVoice: "अपने परिवारों के साथ, हम आपको अपने विवाह में आमंत्रित करते हैं",
-      daughter: "सुपुत्री", son: "सुपुत्र", with: "संग", close: "के शुभ विवाह में आप सपरिवार सादर आमंत्रित हैं।",
+      daughter: "सुपुत्री", son: "सुपुत्र", granddaughter: "सुपौत्री", grandson: "सुपौत्र", with: "संग", close: "के शुभ विवाह में आप सपरिवार सादर आमंत्रित हैं।",
       dearAll: "प्रिय परिवारजन और मित्रो",
       storyT: "हमारी कहानी", photosT: "अब तक का सफ़र", swipe: "आगे देखने के लिए सरकाएँ",
       eventsT: "उत्सव",
@@ -1098,8 +1098,10 @@
             <p class="inv-lede" lang="${lang}">${esc(parents ? u.blessing : u.ownVoice)}</p>
             ${two(
               `<p class="name" lang="${lang}">${esc(nm(data.her))}</p>
+            ${has(data.grandparents?.her) ? `<p class="caps" lang="${lang}" style="margin-top:4px">${esc(u.granddaughter)}</p><p class="parents" lang="${lang}">${esc(nb(pick(data.grandparents.her)))}</p>` : ""}
             ${has(data.parents?.her) ? `<p class="caps" lang="${lang}" style="margin-top:4px">${esc(u.daughter)}</p><p class="parents" lang="${lang}">${esc(nb(pick(data.parents.her)))}</p>` : ""}`,
               `<p class="name" lang="${lang}">${esc(nm(data.him))}</p>
+            ${has(data.grandparents?.him) ? `<p class="caps" lang="${lang}" style="margin-top:4px">${esc(u.grandson)}</p><p class="parents" lang="${lang}">${esc(nb(pick(data.grandparents.him)))}</p>` : ""}
             ${has(data.parents?.him) ? `<p class="caps" lang="${lang}" style="margin-top:4px">${esc(u.son)}</p><p class="parents" lang="${lang}">${esc(nb(pick(data.parents.him)))}</p>` : ""}`,
             ).join(`
             <p class="with" lang="${lang}">${esc(u.with)}</p>
